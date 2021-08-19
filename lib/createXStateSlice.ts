@@ -9,6 +9,9 @@ export const createXStateSlice = <
   service: Interpreter<TContext, any, TEvent>,
   getState: (state: State<TContext, TEvent>) => TSelectedState,
 ) => {
+  /**
+   * A reducer which you can use directly in Redux
+   */
   const reducer = (
     _state: TSelectedState | undefined,
     event: TEvent,
@@ -17,6 +20,10 @@ export const createXStateSlice = <
     return getState(service.state);
   };
 
+  /**
+   * A function that allows the store to keep up to date
+   * with changes in the running XState service
+   */
   const subscribe = (store: Store) => {
     const { unsubscribe } = service.subscribe((state) => {
       if (state.changed) {
@@ -24,12 +31,23 @@ export const createXStateSlice = <
           store.dispatch({
             type: `__UPDATE_${state._sessionid}`,
           });
-        } catch (e) {}
+        } catch (e) {
+          /**
+           * Uncomment this line to see an error that I'd
+           * love feedback on. What am I doing to cause this,
+           * and how can I mitigate it?
+           */
+          // console.log(e)
+        }
       }
     });
     return unsubscribe;
   };
 
+  /**
+   * TODO - potentially add action creators in here
+   * to give it feature parity with redux-toolkit
+   */
   return {
     reducer,
     subscribe,
