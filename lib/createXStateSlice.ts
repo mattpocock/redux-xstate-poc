@@ -33,11 +33,11 @@ export const createXStateSlice = <
           });
         } catch (e) {
           /**
-           * Uncomment this line to see an error that I'd
-           * love feedback on. What am I doing to cause this,
-           * and how can I mitigate it?
+           * Uncomment this line and press 'decrement' to see
+           * an error that I'd love feedback on. What am I
+           * doing to cause this, and how can I mitigate it?
            */
-          // console.log(e)
+          console.log(e);
         }
       }
     });
