@@ -1,6 +1,31 @@
 # XState Redux
 
-Incrementally adopt XState in your redux app with some simple middleware.
+Incrementally adopt XState in your Redux app with some simple middleware.
+
+```ts
+export const counterSlice = createXStateSlice({
+  // Pass in a unique, descriptive name for the slice
+  name: "counter",
+  // Pass in the machine
+  machine: counterMachine,
+  /**
+   * Get the state we want to pass from the machine
+   * to Redux.
+   */
+  getSelectedState: (state) => {
+    return {
+      count: state.context.count,
+    };
+  },
+});
+
+export const store = configureStore({
+  reducer: {
+    counter: counterSlice.reducer,
+  },
+  middleware: [createXStateMiddleware(counterSlice)],
+});
+```
 
 ## Getting Started
 
