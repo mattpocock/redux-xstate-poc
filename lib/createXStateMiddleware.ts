@@ -13,10 +13,11 @@ export const createXStateMiddleware = (
 
     return function wrapDispatch(next) {
       return function handleAction(action) {
-        next(action);
+        const nextResult = next(action);
         services.forEach((service) => {
           service.send(action);
         });
+        return nextResult;
       };
     };
   };
