@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { counterSlice } from "./counterSlice";
+import { subscribeStoreToXStateSlices } from "./subscribeStoreToXStateSlices";
 
 export const store = configureStore({
   reducer: {
@@ -8,11 +9,11 @@ export const store = configureStore({
 });
 
 /**
- * TODO - add a function which allows you to subscribe multiple
- * slices to the store, or potentially find a way to do this
- * through middleware?
+ * You must add all XState slices to this list
+ * in order for the store to be subscribed to its
+ * internal updates
  */
-counterSlice.subscribe(store);
+subscribeStoreToXStateSlices(store, counterSlice);
 
 export type RootState = ReturnType<typeof store.getState>;
 

@@ -30,6 +30,7 @@ export const createXStateSlice = <
         try {
           store.dispatch({
             type: `__UPDATE_${state._sessionid}`,
+            state: getState(state),
           });
         } catch (e) {
           /**
