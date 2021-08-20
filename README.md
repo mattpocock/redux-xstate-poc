@@ -1,6 +1,6 @@
 # XState Redux
 
-Incrementally adopt XState in your Redux app with some simple middleware. Use 100% of XState's features, and get the benefits of Redux's tooling.
+Incrementally adopt XState in your Redux app with some simple middleware. Use 100% of XState's features.
 
 ```ts
 export const counterSlice = createXStateSlice({
