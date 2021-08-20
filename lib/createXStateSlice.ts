@@ -34,14 +34,16 @@ export const createXStateSlice = <
   TContext,
   TEvent extends EventObject,
   TSelectedState,
->(
-  name: string,
-  machine: StateMachine<TContext, any, TEvent>,
-  getSelectedState: (state: State<TContext, TEvent>) => TSelectedState,
-): XStateSlice<TContext, TEvent, TSelectedState> => {
+>(params: {
+  name: string;
+  machine: StateMachine<TContext, any, TEvent>;
+  getSelectedState: (state: State<TContext, TEvent>) => TSelectedState;
+}): XStateSlice<TContext, TEvent, TSelectedState> => {
   let service: Interpreter<TContext, any, TEvent> | undefined = undefined;
 
-  const initialReduxState = getSelectedState(machine.initialState);
+  const initialReduxState = params.getSelectedState(
+    params.machine.initialState,
+  );
 
   const updateEvent = (state: TSelectedState) => ({
     type: `${name}.xstate.update`,
@@ -71,7 +73,7 @@ export const createXStateSlice = <
    * will call it when the slice is passed in
    */
   const start = (store: MiddlewareAPI) => {
-    service = interpret(machine, {
+    service = interpret(params.machine, {
       parent: {
         send: (event: any) => {
           store.dispatch(event);
@@ -84,7 +86,7 @@ export const createXStateSlice = <
 
     service.subscribe((state) => {
       if (!state.changed) return;
-      store.dispatch(updateEvent(getSelectedState(state)));
+      store.dispatch(updateEvent(params.getSelectedState(state)));
     });
 
     return service;
