@@ -1,18 +1,10 @@
 import type { NextPage } from "next";
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../lib/store";
-
-let renders = 0;
 
 const Home: NextPage = () => {
   const count = useSelector((state: RootState) => state.counter.count);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    renders++;
-    console.log(renders);
-  });
 
   return (
     <div>
