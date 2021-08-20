@@ -1,19 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { counterSlice } from "./counterSlice";
-import { subscribeStoreToXStateSlices } from "./subscribeStoreToXStateSlices";
+import { createXStateMiddleware } from "./createXStateMiddleware";
 
 export const store = configureStore({
   reducer: {
     counter: counterSlice.reducer,
   },
+  middleware: [createXStateMiddleware(counterSlice)],
 });
-
-/**
- * You must add all XState slices to this list
- * in order for the store to be subscribed to its
- * internal updates
- */
-subscribeStoreToXStateSlices(store, counterSlice);
 
 export type RootState = ReturnType<typeof store.getState>;
 

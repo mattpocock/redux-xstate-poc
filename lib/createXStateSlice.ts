@@ -1,56 +1,110 @@
-import { Store } from "redux";
-import { EventObject, Interpreter, State } from "xstate";
+import { MiddlewareAPI, Store } from "redux";
+import {
+  AnyEventObject,
+  EventObject,
+  interpret,
+  Interpreter,
+  State,
+  StateMachine,
+} from "xstate";
 
+/**
+ * A 'slice' (to use the Redux Toolkit terminology)
+ * of state which provides a reducer, and the required
+ * functionality to
+ */
+export type XStateSlice<
+  TContext = any,
+  TEvent extends EventObject = AnyEventObject,
+  TSelectedState = any,
+> = {
+  _start: (store: MiddlewareAPI) => Interpreter<TContext, any, TEvent>;
+  getService: () => Interpreter<TContext, any, TEvent>;
+  reducer: (
+    state: TSelectedState | undefined,
+    action: TEvent,
+  ) => TSelectedState;
+};
+
+/**
+ * Create a 'slice' which can convert an XState machine
+ * into a reducer which can be used in Redux
+ */
 export const createXStateSlice = <
   TContext,
   TEvent extends EventObject,
   TSelectedState,
 >(
-  service: Interpreter<TContext, any, TEvent>,
-  getState: (state: State<TContext, TEvent>) => TSelectedState,
-) => {
+  name: string,
+  machine: StateMachine<TContext, any, TEvent>,
+  getSelectedState: (state: State<TContext, TEvent>) => TSelectedState,
+): XStateSlice<TContext, TEvent, TSelectedState> => {
+  let service: Interpreter<TContext, any, TEvent> | undefined = undefined;
+
+  const initialReduxState = getSelectedState(machine.initialState);
+
+  const updateEvent = (state: TSelectedState) => ({
+    type: `${name}.xstate.update`,
+    state,
+  });
+
   /**
-   * A reducer which you can use directly in Redux
+   * A reducer which you should pass to redux
    */
   const reducer = (
-    _state: TSelectedState | undefined,
-    event: TEvent,
+    state: TSelectedState | undefined = initialReduxState,
+    event: any,
   ): TSelectedState => {
-    service.send(event);
-    return getState(service.state);
+    switch (event.type) {
+      case `${name}.xstate.update`:
+        return event.state;
+      default:
+        return state as TSelectedState;
+    }
   };
 
   /**
-   * A function that allows the store to keep up to date
-   * with changes in the running XState service
+   * A function designed to be called by the middleware,
+   * which starts the machine and subscribes it to the store
+   *
+   * There's no need to call this yourself - the middleware
+   * will call it when the slice is passed in
    */
-  const subscribe = (store: Store) => {
-    const { unsubscribe } = service.subscribe((state) => {
-      if (state.changed) {
-        try {
-          store.dispatch({
-            type: `__UPDATE_${state._sessionid}`,
-            state: getState(state),
-          });
-        } catch (e) {
-          /**
-           * Uncomment this line and press 'decrement' to see
-           * an error that I'd love feedback on. What am I
-           * doing to cause this, and how can I mitigate it?
-           */
-          console.log(e);
-        }
-      }
+  const start = (store: MiddlewareAPI) => {
+    service = interpret(machine, {
+      parent: {
+        send: (event: any) => {
+          store.dispatch(event);
+        },
+        getSnapshot: () => {
+          return store.getState();
+        },
+      } as any,
+    }).start();
+
+    service.subscribe((state) => {
+      if (!state.changed) return;
+      store.dispatch(updateEvent(getSelectedState(state)));
     });
-    return unsubscribe;
+
+    return service;
   };
 
   /**
-   * TODO - potentially add action creators in here
-   * to give it feature parity with redux-toolkit
+   * A getter for the running XState service
    */
+  const getService = () => {
+    if (!service) {
+      throw new Error(
+        `getService was called on ${name} slice before slice.start() was called. slice.start() is usually called by the middleware.`,
+      );
+    }
+    return service;
+  };
+
   return {
+    _start: start,
     reducer,
-    subscribe,
+    getService,
   };
 };

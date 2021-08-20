@@ -1,4 +1,4 @@
-import { assign, createMachine, interpret } from "xstate";
+import { assign, createMachine, interpret, sendParent } from "xstate";
 import { createXStateSlice } from "./createXStateSlice";
 
 const counterMachine = createMachine<{ count: number }>({
@@ -20,9 +20,6 @@ const counterMachine = createMachine<{ count: number }>({
             count: context.count - 1,
           };
         }),
-        () => {
-          console.log("DECREMENT");
-        },
       ],
     },
   },
@@ -38,7 +35,8 @@ const counterMachine = createMachine<{ count: number }>({
 });
 
 export const counterSlice = createXStateSlice(
-  interpret(counterMachine).start(),
+  "counter",
+  counterMachine,
   (state) => {
     return {
       count: state.context.count,
