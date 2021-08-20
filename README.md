@@ -37,6 +37,6 @@ export const store = configureStore({
 
 **Use statecharts as reducers**: Call `createMachine`, then pass it into `createXStateSlice`, and you're good to go. You can use 100% of XState's features right alongside Redux.
 
-**Use sendParent to send events to Redux**: The Redux store is your machine's 'parent', meaning you can call `sendParent` to send actions to Redux.
+**Use sendParent to send events to Redux**: The Redux store is your machine's 'parent', meaning you can call `sendParent` to send actions to Redux. In future versions of XState, you'll be able to call `parent.getSnapshot()` to grab the Redux store's state.
 
 **Colocate side effects with your Redux logic**: No more splitting out side effects from your app logic. Use `invoke`, `actions` and even spawn actors in your XState machines.
