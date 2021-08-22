@@ -46,7 +46,7 @@ export const createXStateSlice = <
   );
 
   const updateEvent = (state: TSelectedState) => ({
-    type: `${name}.xstate.update`,
+    type: `${params.name}.xstate.update`,
     state,
   });
 
@@ -58,7 +58,7 @@ export const createXStateSlice = <
     event: any,
   ): TSelectedState => {
     switch (event.type) {
-      case `${name}.xstate.update`:
+      case `${params.name}.xstate.update`:
         return event.state;
       default:
         return state as TSelectedState;
@@ -98,7 +98,7 @@ export const createXStateSlice = <
   const getService = () => {
     if (!service) {
       throw new Error(
-        `getService was called on ${name} slice before slice.start() was called. slice.start() is usually called by the middleware.`,
+        `getService was called on ${params.name} slice before slice.start() was called. slice.start() is usually called by the middleware.`,
       );
     }
     return service;
