@@ -39,6 +39,7 @@ export const createXStateSlice = <
   machine: StateMachine<TContext, any, TEvent>;
   getSelectedState: (state: State<TContext, TEvent>) => TSelectedState;
 }): XStateSlice<TContext, TEvent, TSelectedState> => {
+  const { name } = params;
   let service: Interpreter<TContext, any, TEvent> | undefined = undefined;
 
   const initialReduxState = params.getSelectedState(
